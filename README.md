@@ -4,13 +4,13 @@ This application is intended as a learning project for anyone who wishes to cont
 
 ## User stories
 
--[ ] Users choose a nickname to log in
--[ ] Users can join server-generated rooms or create their own rooms and invite their friends
--[ ] One user is assigned a word. They draw it on the canvas, while the other users will see the drawing and try to guess the word by typing it out on a dialog box
--[ ] Users can change their drawing color, line thickness and draw geometric figures
--[ ] Users can see a list of who's in the room right now
--[ ] Users can chat on a separate dialog box
--[ ] Users score points and are ranked within the room
+* Users choose a nickname to log in
+* Users can join server-generated rooms or create their own rooms and invite their friends
+* One user is assigned a word. They draw it on the canvas, while the other users will see the drawing and try to guess the word by typing it out on a dialog box
+* Users can change their drawing color, line thickness and draw geometric figures
+* Users can see a list of who's in the room right now
+* Users can chat on a separate dialog box  
+* Users score points and are ranked within the room
 
 ## Understanding the application
 
