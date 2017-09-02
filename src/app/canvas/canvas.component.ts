@@ -17,7 +17,7 @@ import 'rxjs/add/operator/switchMap';
   styleUrls: ['./canvas.component.css']
 })
 export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
-  connection: Subscription;
+  connection: Subscription; //Subscription that will listen to changes in the canvas
   //captures the element marked as #canvas
   @ViewChild('canvas') public canvas: ElementRef;
 
@@ -30,7 +30,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
 
   ngOnInit() {
     this.connection = this.socketService.getDrawingInstructions().subscribe(instructions => {
-      this.drawOnCanvas(instructions);
+      this.drawOnCanvas(instructions); //Listen to changes on the canvas and draw them on my canvas
     })
   }
   ngOnDestroy() {
@@ -39,7 +39,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
 
   public ngAfterViewInit() {
     const canvasEl: HTMLCanvasElement = this.canvas.nativeElement;
-    this.cx = canvasEl.getContext('2d');
+    this.cx = canvasEl.getContext('2d'); //This allows us to set the characteristics of our canvas
 
     canvasEl.width = this.width;
     canvasEl.height = this.height;
@@ -64,17 +64,18 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
         const rect = canvasEl.getBoundingClientRect(); //returns the size and position of the canvas rectangle
         let mouseDownEvent: MouseEvent = res[0];
         let mouseMoveEvent: MouseEvent = res[1];
-        //We calculate the relative position of the mouse minus the borders of the canvas
+        //We calculate the relative position of the mouse minus the borders of the canvas and save
         let instructions : Instructions = {prevPos:{x:0,y:0},currentPos:{x:0,y:0}};
-        instructions['prevPos'].x = mouseDownEvent.clientX - rect.left;
-        instructions['prevPos'].y = mouseDownEvent.clientY - rect.top;
-
-        instructions['currentPos'] = {
+        instructions.prevPos = {
+          x : mouseDownEvent.clientX - rect.left,
+          y : mouseDownEvent.clientY - rect.top
+        }
+        instructions.currentPos = {
           x: mouseMoveEvent.clientX - rect.left,
           y: mouseMoveEvent.clientY - rect.top
         };
-        this.socketService.sendDrawingInstructions(instructions);
-        this.drawOnCanvas(instructions);
+        this.socketService.sendDrawingInstructions(instructions); //send these instructions to all clienst
+        this.drawOnCanvas(instructions);//draw them
       });
   }
 

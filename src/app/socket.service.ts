@@ -6,10 +6,10 @@ export class SocketService {
   private url = 'http://localhost:5000';
   private socket;
 
-  sendMessage(message) {
+  sendMessage(message : string) { //Method that emits to all clients a message
     this.socket.emit('add-message', message);
   }
-  sendDrawingInstructions(instructions : Instructions) {
+  sendDrawingInstructions(instructions : Instructions) { //Method that emits drawing instructions to all clients
     this.socket.emit('add-drawingInstructions', instructions);
   }
   getMessages() { //method returns Observable that can be subscribed to
@@ -24,7 +24,7 @@ export class SocketService {
     })
     return observable;
   }
-  getDrawingInstructions() : Observable<Instructions> {
+  getDrawingInstructions() : Observable<Instructions> { //Same logic as previous method
     let observable = new Observable(observer => {
       this.socket = io(this.url);
       this.socket.on('drawingInstructions',(data) => {
