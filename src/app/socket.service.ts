@@ -1,16 +1,17 @@
 import { Observable } from 'rxjs/Observable';
 import * as io from 'socket.io-client';
 import { Instructions } from './instructions';
+import { Options } from './options';
 
 export class SocketService {
   private url = 'http://localhost:5000';
   private socket;
 
-  sendMessage(message : string) { //Method that emits to all clients a message
+  sendMessage(message: string) { //Method that emits to all clients a message
     this.socket.emit('add-message', message);
   }
-  sendDrawingInstructions(instructions : Instructions) { //Method that emits drawing instructions to all clients
-    this.socket.emit('add-drawingInstructions', instructions);
+  sendDrawingInstructions(instructions: Instructions, options: Options) { //Method that emits drawing instructions to all clients
+    this.socket.emit('add-drawingInstructions', instructions, options);
   }
   getMessages() { //method returns Observable that can be subscribed to
     let observable = new Observable(observer => {
@@ -24,12 +25,12 @@ export class SocketService {
     })
     return observable;
   }
-  getDrawingInstructions() : Observable<Instructions> { //Same logic as previous method
+  getDrawingInstructions(): Observable<any> { //Same logic as previous method.
     let observable = new Observable(observer => {
       this.socket = io(this.url);
-      this.socket.on('drawingInstructions',(data) => {
-        console.log(data.instructions);
-        observer.next(data.instructions);
+      this.socket.on('drawingInstructions', (data) => {
+        //data contains one object called instructions and one object called options
+        observer.next(data);
       });
       return () => {
         this.socket.disconnect();

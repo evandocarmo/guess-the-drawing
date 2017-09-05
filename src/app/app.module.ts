@@ -16,6 +16,10 @@ import { CanvasComponent } from './canvas/canvas.component';
     FormsModule,
     HttpModule
   ],
+  exports:[
+    AppComponent,
+    CanvasComponent
+  ],
   providers: [SocketService],
   bootstrap: [AppComponent]
 })

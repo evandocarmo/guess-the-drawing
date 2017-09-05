@@ -5,6 +5,7 @@ import { Observable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Subscription';
 import { SocketService } from '../socket.service';
 import { Instructions } from '../instructions';
+import { Options } from '../options';
 
 import 'rxjs/add/observable/fromEvent';
 import 'rxjs/add/operator/takeUntil';
@@ -25,12 +26,17 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
   @Input() public height = 400;
 
   private cx: CanvasRenderingContext2D; //Object interface that holds the canvas configuration
+  private options: Options = { //this Options object can be altered by the user
+    lineWidth: 3,
+    lineCap: "round",
+    strokeStyle: "#000"
+  };
 
   constructor(private socketService: SocketService) { }
 
   ngOnInit() {
-    this.connection = this.socketService.getDrawingInstructions().subscribe(instructions => {
-      this.drawOnCanvas(instructions); //Listen to changes on the canvas and draw them on my canvas
+    this.connection = this.socketService.getDrawingInstructions().subscribe(data => {
+      this.drawOnCanvas(data.instructions, data.options); //Listen to changes on the canvas and draw them on this canvas
     })
   }
   ngOnDestroy() {
@@ -43,10 +49,6 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
 
     canvasEl.width = this.width;
     canvasEl.height = this.height;
-
-    this.cx.lineWidth = 3;
-    this.cx.lineCap = 'round';
-    this.cx.strokeStyle = '#000'; //takes a css color value
 
     this.captureEvents(canvasEl);
   }
@@ -65,23 +67,25 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
         let mouseDownEvent: MouseEvent = res[0];
         let mouseMoveEvent: MouseEvent = res[1];
         //We calculate the relative position of the mouse minus the borders of the canvas and save
-        let instructions : Instructions = {prevPos:{x:0,y:0},currentPos:{x:0,y:0}};
+        let instructions: Instructions = { prevPos: { x: 0, y: 0 }, currentPos: { x: 0, y: 0 } };
         instructions.prevPos = {
-          x : mouseDownEvent.clientX - rect.left,
-          y : mouseDownEvent.clientY - rect.top
+          x: mouseDownEvent.clientX - rect.left,
+          y: mouseDownEvent.clientY - rect.top
         }
         instructions.currentPos = {
           x: mouseMoveEvent.clientX - rect.left,
           y: mouseMoveEvent.clientY - rect.top
         };
-        this.socketService.sendDrawingInstructions(instructions); //send these instructions to all clienst
-        this.drawOnCanvas(instructions);//draw them
+        this.socketService.sendDrawingInstructions(instructions, this.options); //send these instructions to all clienst
+        this.drawOnCanvas(instructions, this.options);//draw them
       });
   }
 
-  private drawOnCanvas(instructions: Instructions) {
+  private drawOnCanvas(instructions: Instructions, options: Options) {
     if (!this.cx) { return; } //error checking
-
+    this.cx.lineWidth = options.lineWidth;
+    this.cx.lineCap = options.lineCap;
+    this.cx.strokeStyle = options.strokeStyle;
     this.cx.beginPath();
 
     if (instructions.prevPos) {

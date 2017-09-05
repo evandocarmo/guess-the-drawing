@@ -1,2 +1,10 @@
 <!-- the pound sign creates an angular variable-->
 <canvas #canvas></canvas>
+<!-- These input and select elements allow the user to color, size and style of his drawing -->
+<input id="lineWidth" [(ngModel)]="options['lineWidth']" type="number" name="lineWidth">
+<select id="lineCap" [(ngModel)]="options.lineCap" type="select" name="lineCap">
+  <option value="round">Round</option>
+  <option value="butt">Butt</option>
+  <option value="square">Square</option>
+</select>
+<input type="color" id="strokeStyle" name="strokeStyle" [(ngModel)]="options.strokeStyle">

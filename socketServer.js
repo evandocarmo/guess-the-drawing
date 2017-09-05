@@ -9,10 +9,12 @@ io.on('connection', (socket) => {
     console.log('user disconnected');
   });
 
-  socket.on('add-drawingInstructions', (instructions) => {
+  socket.on('add-drawingInstructions', (instructions, options) => {
+    console.log(instructions, options);
     io.emit('drawingInstructions', {
       type: 'new-drawingInstructions',
-      instructions: instructions
+      instructions: instructions,
+      options: options
     })
   });
 
