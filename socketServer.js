@@ -17,7 +17,12 @@ io.on('connection', (socket) => {
       options: options
     })
   });
-
+  socket.on('add-answer', (answer) => {
+    io.emit('answer', {
+      type: 'new-answer',
+      text: answer
+    });
+  });
   socket.on('add-message', (message) => {
     io.emit('message', {
       type: 'new-message',

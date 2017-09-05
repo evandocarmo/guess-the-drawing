@@ -18,29 +18,46 @@ import 'rxjs/add/operator/switchMap';
   styleUrls: ['./canvas.component.css']
 })
 export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
-  connection: Subscription; //Subscription that will listen to changes in the canvas
+  //CANVAS RELATED VARIABLES
+  canvasSubs: Subscription; //Subscription that will listen to changes in the canvas
   //captures the element marked as #canvas
-  @ViewChild('canvas') public canvas: ElementRef;
-
-  @Input() public width = 400;
-  @Input() public height = 400;
-
   private cx: CanvasRenderingContext2D; //Object interface that holds the canvas configuration
   private options: Options = { //this Options object can be altered by the user
     lineWidth: 3,
     lineCap: "round",
     strokeStyle: "#000"
   };
+  @ViewChild('canvas') public canvas: ElementRef;
+  @Input() public width = 400;
+  @Input() public height = 400;
+
+  //CHAT MESSAGE BOX VARIABLES
+  messageSubs: Subscription; //Subscription that listens to chat messages
+  myMessage: string; //The current user's message
+  chatMessages: string[] = []; //array that holds chat messages sent and received
+
+  //ANSWERS BOX VARIABLES
+  answerBoxSubs: Subscription;
+  myAnswer: string;
+  answers: string[] = [];
 
   constructor(private socketService: SocketService) { }
 
   ngOnInit() {
-    this.connection = this.socketService.getDrawingInstructions().subscribe(data => {
+    this.canvasSubs = this.socketService.getDrawingInstructions().subscribe(data => {
       this.drawOnCanvas(data.instructions, data.options); //Listen to changes on the canvas and draw them on this canvas
-    })
+    });
+    this.messageSubs = this.socketService.getMessages().subscribe(data => {
+      this.chatMessages.push(data['text']); //Listen to messages and push them to the array
+    });
+    this.answerBoxSubs = this.socketService.getAnswers().subscribe(data => {
+      console.log(data);
+      this.answers.push(data['text']);
+    });
   }
   ngOnDestroy() {
-    this.connection.unsubscribe;
+    this.canvasSubs.unsubscribe;
+    this.messageSubs.unsubscribe;
   }
 
   public ngAfterViewInit() {
@@ -93,5 +110,13 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
       this.cx.lineTo(instructions.currentPos.x, instructions.currentPos.y); //to current position
       this.cx.stroke(); //draw!
     }
+  }
+  private sendMessage() {
+    this.socketService.sendMessage(this.myMessage);
+    this.myMessage = '';
+  }
+  private sendAnswer() {
+    this.socketService.sendAnswer(this.myAnswer);
+    this.myAnswer = '';
   }
 }

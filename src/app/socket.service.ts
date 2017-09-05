@@ -13,6 +13,9 @@ export class SocketService {
   sendDrawingInstructions(instructions: Instructions, options: Options) { //Method that emits drawing instructions to all clients
     this.socket.emit('add-drawingInstructions', instructions, options);
   }
+  sendAnswer(answer: string) {
+    this.socket.emit('add-answer', answer);
+  }
   getMessages() { //method returns Observable that can be subscribed to
     let observable = new Observable(observer => {
       this.socket = io(this.url);
@@ -36,6 +39,18 @@ export class SocketService {
         this.socket.disconnect();
       };
     })
+    return observable;
+  }
+  getAnswers(): Observable<any> {
+    let observable = new Observable(observer => {
+      this.socket = io(this.url);
+      this.socket.on('answer', (data) => {
+        observer.next(data);
+      });
+      return () => {
+        this.socket.disconnect();
+      };
+    });
     return observable;
   }
 }
