@@ -5,7 +5,7 @@ let io = require('socket.io')(http);
 let room;
 
 io.on('connection', (socket) => { //When a user connects...
-  console.log('user connected');
+  console.log('user connected',new Date().toLocaleString());
 
   socket.on('join room', (roomName) => { //and emits a 'join room' event, make it join that room
     room = roomName; //set the variable socket.room to save the user provided room name
@@ -18,7 +18,6 @@ io.on('connection', (socket) => { //When a user connects...
   });
 
   socket.on('add-drawingInstructions', (instructions, options) => {
-    console.log(room);
     io.sockets.in(room).emit('drawingInstructions', {
       type: 'new-drawingInstructions',
       instructions: instructions,

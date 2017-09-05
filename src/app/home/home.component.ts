@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-home',
@@ -7,9 +8,20 @@ import { Component, OnInit } from '@angular/core';
 })
 export class HomeComponent implements OnInit {
 
-  constructor() { }
+  private name: string;
+  private room: string;
+
+  constructor(private router: Router) { }
 
   ngOnInit() {
   }
 
+  enterRoom(){
+    if(!this.name || !this.room)
+      return;
+    else
+      localStorage.setItem('name',this.name);
+      localStorage.setItem('room',this.room);
+      this.router.navigate(['/game']);
+  }
 }

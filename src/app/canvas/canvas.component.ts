@@ -6,6 +6,7 @@ import { Subscription } from 'rxjs/Subscription';
 import { SocketService } from '../socket.service';
 import { Instructions } from '../instructions';
 import { Options } from '../options';
+import { Router } from '@angular/router';
 
 import 'rxjs/add/observable/fromEvent';
 import 'rxjs/add/operator/takeUntil';
@@ -19,6 +20,9 @@ import 'rxjs/add/operator/switchMap';
 })
 export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
   subscription: Subscription; //Subscription that represents the socket
+  name: string = localStorage.getItem('name'); //Home page stores theses values in local storage
+  room: string = localStorage.getItem('room');
+
   //CANVAS RELATED VARIABLES
   private cx: CanvasRenderingContext2D; //Object interface that holds the canvas configuration
   private options: Options = { //this Options object can be altered by the user
@@ -38,15 +42,17 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
   myAnswer: string;
   answers: string[] = [];
 
-  constructor(private socketService: SocketService) { }
+  constructor(private socketService: SocketService, private router: Router) { }
 
   ngOnInit() {
-    this.subscription = this.socketService.connect().subscribe(data => {
-      if(data.type === "new-drawingInstructions")
+    if (!this.name || !this.room) //if these values are not stored
+      this.router.navigate(['/']); // go back to the home page
+    this.subscription = this.socketService.connect(this.room).subscribe(data => {
+      if (data.type === "new-drawingInstructions")
         this.drawOnCanvas(data.instructions, data.options); //Listen to changes on the canvas and draw them on this canvas
-      if(data.type === "new-message")
+      if (data.type === "new-message")
         this.chatMessages.push(data.text);
-      if(data.type === "new-answer")
+      if (data.type === "new-answer")
         this.answers.push(data.text);
     });
   }
