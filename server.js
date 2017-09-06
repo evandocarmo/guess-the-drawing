@@ -1,7 +1,7 @@
 const express = require('express');
 let app = express();
 let http = require('http').Server(app);
-let io = require('socket.io')(http);
+let io = require('socket.io')(process.env.port || 5000);
 
 app.use(express.static(__dirname + '/dist'));
 
