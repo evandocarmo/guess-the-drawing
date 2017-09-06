@@ -71,7 +71,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   captureEvents(canvasEl: HTMLCanvasElement) {
-    Observable //let's create an Observable
+    Observable //let's create an Observable to listen for mouse clicks
       .fromEvent(canvasEl, 'mousedown') //when the users presses the mouse down
       .switchMap((e) => { //switchMap discards the previous values and flattens the Observable
         return Observable //returns a new Observable
@@ -92,6 +92,31 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
         instructions.currentPos = {
           x: mouseMoveEvent.clientX - rect.left,
           y: mouseMoveEvent.clientY - rect.top
+        };
+        this.socketService.sendDrawingInstructions(instructions, this.options); //send these instructions to all clienst
+        this.drawOnCanvas(instructions, this.options);//draw them
+      });
+
+    Observable //now let's listen for mobile touches
+      .fromEvent(canvasEl, 'touchstart')
+      .switchMap((e: Event) => {
+        e.preventDefault();//prevents scrolling when drawing on the canvas
+        return Observable
+          .fromEvent(canvasEl, 'touchmove')
+          .takeUntil(Observable.fromEvent(canvasEl, 'touchend'))
+          .pairwise()
+      }).subscribe((res: [TouchEvent, TouchEvent]) => {
+        const rect = canvasEl.getBoundingClientRect(); //returns the size and position of the canvas rectangle
+        let previousTouch = res[0].touches[0];
+        let currentTouch = res[1].touches[0];
+        let instructions: Instructions = { prevPos: { x: 0, y: 0 }, currentPos: { x: 0, y: 0 } };
+        instructions.prevPos = {
+          x: previousTouch.clientX - rect.left,
+          y: previousTouch.clientY - rect.top
+        }
+        instructions.currentPos = {
+          x: currentTouch.clientX - rect.left,
+          y: currentTouch.clientY - rect.top
         };
         this.socketService.sendDrawingInstructions(instructions, this.options); //send these instructions to all clienst
         this.drawOnCanvas(instructions, this.options);//draw them
