@@ -1,7 +1,7 @@
 const express = require('express');
 let app = express();
 let http = require('http').Server(app);
-let io = require('socket.io')(process.env.port || 5000);
+let io = require('socket.io')(http);
 
 app.use(express.static(__dirname + '/dist'));
 
@@ -42,6 +42,6 @@ io.on('connection', (socket) => { //When a user connects...
   });
 });
 
-http.listen(process.env.port || 5000, () => {
-  console.log('started on port 5000');
+http.listen(process.env.port, () => {
+  console.log(`started on port ${process.env.port}`);
 });
