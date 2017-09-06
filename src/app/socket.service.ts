@@ -7,18 +7,13 @@ import { Injectable } from '@angular/core';
 
 @Injectable() //Injectable declaration allows service to be injected with a provider, in this case, the router
 export class SocketService {
-  private url = 'http://localhost:5000';
   private socket;
 
   constructor(private router: Router) { }
 
   connect(room: string = "1"): Observable<any> { //Method that creates the socket. Takes a room as parameter
-    this.socket = io(this.url, {
-      reconnection: true,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000,
-      reconnectionAttempts: Infinity
-    });
+    console.log('connecting');
+    this.socket = io();
     this.socket.emit('join room', room); // joins the room specified
 
     let observable = new Observable(observer => {

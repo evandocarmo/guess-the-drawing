@@ -8,8 +8,8 @@ import { Router } from '@angular/router';
 })
 export class HomeComponent implements OnInit {
 
-  private name: string;
-  private room: string;
+  name: string;
+  room: string;
 
   constructor(private router: Router) { }
 

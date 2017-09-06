@@ -1,11 +1,13 @@
-let app = require('express')();
+const express = require('express');
+let app = express();
 let http = require('http').Server(app);
 let io = require('socket.io')(http);
 
-let room;
+app.use(express.static(__dirname + '/dist'));
 
+let room;
 io.on('connection', (socket) => { //When a user connects...
-  console.log('user connected',new Date().toLocaleString());
+  console.log('user connected', new Date().toLocaleString());
 
   socket.on('join room', (roomName) => { //and emits a 'join room' event, make it join that room
     room = roomName; //set the variable socket.room to save the user provided room name
@@ -38,6 +40,6 @@ io.on('connection', (socket) => { //When a user connects...
   });
 });
 
-http.listen(5000, () => {
+http.listen(process.env.port || 5000, () => {
   console.log('started on port 5000');
 });

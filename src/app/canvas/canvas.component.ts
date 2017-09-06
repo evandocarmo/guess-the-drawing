@@ -25,7 +25,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
 
   //CANVAS RELATED VARIABLES
   private cx: CanvasRenderingContext2D; //Object interface that holds the canvas configuration
-  private options: Options = { //this Options object can be altered by the user
+  public options: Options = { //this Options object can be altered by the user
     lineWidth: 3,
     lineCap: "round",
     strokeStyle: "#000"
@@ -70,7 +70,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
     this.captureEvents(canvasEl);
   }
 
-  private captureEvents(canvasEl: HTMLCanvasElement) {
+  captureEvents(canvasEl: HTMLCanvasElement) {
     Observable //let's create an Observable
       .fromEvent(canvasEl, 'mousedown') //when the users presses the mouse down
       .switchMap((e) => { //switchMap discards the previous values and flattens the Observable
@@ -98,7 +98,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
       });
   }
 
-  private drawOnCanvas(instructions: Instructions, options: Options) {
+  drawOnCanvas(instructions: Instructions, options: Options) {
     if (!this.cx) { return; } //error checking
     this.cx.lineWidth = options.lineWidth;
     this.cx.lineCap = options.lineCap;
@@ -111,11 +111,11 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
       this.cx.stroke(); //draw!
     }
   }
-  private sendMessage() {
+  sendMessage() {
     this.socketService.sendMessage(this.myMessage);
     this.myMessage = '';
   }
-  private sendAnswer() {
+  sendAnswer() {
     this.socketService.sendAnswer(this.myAnswer);
     this.myAnswer = '';
   }

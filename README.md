@@ -22,4 +22,4 @@ The `CanvasComponent` and the `SocketService` classes presently hold most of the
 
 ## Installing
 
-Run `npm install` to install dependencies. Serve front-end app with the `ng serve` command and socket server with `node socketServer`.
+Run `npm install` to install dependencies. A production version will be compiled and save to the `dist` folder. Serve the app with `node server`.
