@@ -42,6 +42,6 @@ io.on('connection', (socket) => { //When a user connects...
   });
 });
 
-http.listen(process.env.port, () => {
-  console.log(`started on port ${process.env.port}`);
+http.listen(process.env.PORT || 5000, () => {
+  console.log(`started on port ${process.env.PORT || '5000'}`);
 });
