@@ -5,6 +5,8 @@ let io = require('socket.io')(http);
 
 app.use(express.static(__dirname + '/dist'));
 
+app.use((req, res)=>res.sendfile(__dirname + '/dist/index.html'));
+
 let room;
 io.on('connection', (socket) => { //When a user connects...
   console.log('user connected', new Date().toLocaleString());
