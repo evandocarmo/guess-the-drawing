@@ -23,3 +23,6 @@ The `CanvasComponent` and the `SocketService` classes presently hold most of the
 ## Installing
 
 Run `npm install` to install dependencies. A production version will be compiled and save to the `dist` folder. Serve the app with `node server`.
+
+## Demo
+[Click here](https://guess-the-drawing.herokuapp.com) to test.
