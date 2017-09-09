@@ -31,8 +31,8 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
     strokeStyle: "#000"
   };
   @ViewChild('canvas') public canvas: ElementRef;
-  @Input() public width = 400;
-  @Input() public height = 400;
+  @Input() public width = (window.screen.width / 3) * 2;
+  @Input() public height = (window.screen.width / 3) * 2;
 
   //CHAT MESSAGE BOX VARIABLES
   myMessage: string; //The current user's message
