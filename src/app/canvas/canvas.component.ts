@@ -24,6 +24,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
   room: string = localStorage.getItem('room');
 
   //CANVAS RELATED VARIABLES
+  canvasEl: HTMLCanvasElement;
   private cx: CanvasRenderingContext2D; //Object interface that holds the canvas configuration
   public options: Options = { //this Options object can be altered by the user
     lineWidth: 3,
@@ -61,37 +62,35 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   public ngAfterViewInit() {
-    const canvasEl: HTMLCanvasElement = this.canvas.nativeElement;
-    this.cx = canvasEl.getContext('2d'); //This allows us to set the characteristics of our canvas
+    this.canvasEl = this.canvas.nativeElement;
+    this.cx = this.canvasEl.getContext('2d'); //This allows us to set the characteristics of our canvas
+    this.canvasEl.width = this.width;
+    this.canvasEl.height = this.height;
 
-    canvasEl.width = this.width;
-    canvasEl.height = this.height;
-
-    this.captureEvents(canvasEl);
+    this.captureEvents(this.canvasEl);
   }
 
   captureEvents(canvasEl: HTMLCanvasElement) {
     Observable //let's create an Observable to listen for mouse clicks
-      .fromEvent(canvasEl, 'mousedown') //when the users presses the mouse down
+      .fromEvent(this.canvasEl, 'mousedown') //when the users presses the mouse down
       .switchMap((e) => { //switchMap discards the previous values and flattens the Observable
         return Observable //returns a new Observable
-          .fromEvent(canvasEl, 'mousemove') //When the mouse moves
-          .takeUntil(Observable.fromEvent(canvasEl, 'mouseup')) //that'll stop when the mouse is unpressed
+          .fromEvent(this.canvasEl, 'mousemove') //When the mouse moves
+          .takeUntil(Observable.fromEvent(this.canvasEl, 'mouseup')) //that'll stop when the mouse is unpressed
           .pairwise() //emits the previous and current values as an array, returning the mouse down and the mouse move events
       })
       .subscribe((res: [MouseEvent, MouseEvent]) => {
-        const rect = canvasEl.getBoundingClientRect(); //returns the size and position of the canvas rectangle
         let mouseDownEvent: MouseEvent = res[0];
         let mouseMoveEvent: MouseEvent = res[1];
         //We calculate the relative position of the mouse minus the borders of the canvas and save
         let instructions: Instructions = { prevPos: { x: 0, y: 0 }, currentPos: { x: 0, y: 0 } };
         instructions.prevPos = {
-          x: mouseDownEvent.clientX - rect.left,
-          y: mouseDownEvent.clientY - rect.top
+          x: mouseDownEvent.clientX,
+          y: mouseDownEvent.clientY
         }
         instructions.currentPos = {
-          x: mouseMoveEvent.clientX - rect.left,
-          y: mouseMoveEvent.clientY - rect.top
+          x: mouseMoveEvent.clientX,
+          y: mouseMoveEvent.clientY
         };
         this.socketService.sendDrawingInstructions(instructions, this.options); //send these instructions to all clienst
         this.drawOnCanvas(instructions, this.options);//draw them
@@ -106,17 +105,16 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
           .takeUntil(Observable.fromEvent(canvasEl, 'touchend'))
           .pairwise()
       }).subscribe((res: [TouchEvent, TouchEvent]) => {
-        const rect = canvasEl.getBoundingClientRect(); //returns the size and position of the canvas rectangle
         let previousTouch = res[0].touches[0];
         let currentTouch = res[1].touches[0];
         let instructions: Instructions = { prevPos: { x: 0, y: 0 }, currentPos: { x: 0, y: 0 } };
         instructions.prevPos = {
-          x: previousTouch.clientX - rect.left,
-          y: previousTouch.clientY - rect.top
+          x: previousTouch.clientX,
+          y: previousTouch.clientY
         }
         instructions.currentPos = {
-          x: currentTouch.clientX - rect.left,
-          y: currentTouch.clientY - rect.top
+          x: currentTouch.clientX,
+          y: currentTouch.clientY
         };
         this.socketService.sendDrawingInstructions(instructions, this.options); //send these instructions to all clienst
         this.drawOnCanvas(instructions, this.options);//draw them
@@ -129,10 +127,11 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
     this.cx.lineCap = options.lineCap;
     this.cx.strokeStyle = options.strokeStyle;
     this.cx.beginPath();
-
+    this.cx.scale(3/4,3/4);
+    const rect = this.canvasEl.getBoundingClientRect(); //returns the size and position of the canvas rectangle
     if (instructions.prevPos) {
-      this.cx.moveTo(instructions.prevPos.x, instructions.prevPos.y); // from previous position
-      this.cx.lineTo(instructions.currentPos.x, instructions.currentPos.y); //to current position
+      this.cx.moveTo(instructions.prevPos.x - rect.left, instructions.prevPos.y - rect.top); // from previous position
+      this.cx.lineTo(instructions.currentPos.x - rect.left, instructions.currentPos.y - rect.top); //to current position
       this.cx.stroke(); //draw!
     }
   }
