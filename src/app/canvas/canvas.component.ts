@@ -16,7 +16,10 @@ import 'rxjs/add/operator/switchMap';
 @Component({
   selector: 'app-canvas',
   templateUrl: './canvas.component.html',
-  styleUrls: ['./canvas.component.css']
+  styleUrls: ['./canvas.component.css'],
+  host:{ //host option allows us to access the window object, calling a component method when window is resized
+    '(window:resize)': 'onResize($event)'
+  }
 })
 export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
   subscription: Subscription; //Subscription that represents the socket
@@ -24,6 +27,10 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
   room: string = localStorage.getItem('room');
 
   //CANVAS RELATED VARIABLES
+  //To make sure drawing looks the same in all screens, we have to multiply the drawing coordinates
+  // By the ratio of the original canvas (500px) and the reduced canvas on mobile, as set on the CSS file (310px)
+  //If the mobile device's screen width is bigger than 568px, it fits the original canvas, and the ratio is set to 1
+  mobileRatio : number = window.screen.width < 568 ? 1.61290323 : 1;
   canvasEl: HTMLCanvasElement;
   private cx: CanvasRenderingContext2D; //Object interface that holds the canvas configuration
   public options: Options = { //this Options object can be altered by the user
@@ -32,8 +39,8 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
     strokeStyle: "#000"
   };
   @ViewChild('canvas') public canvas: ElementRef;
-  @Input() public width = 400;
-  @Input() public height = 400;
+  @Input() public width = 500;
+  @Input() public height = 250;
 
   //CHAT MESSAGE BOX VARIABLES
   myMessage: string; //The current user's message
@@ -44,7 +51,9 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
   answers: string[] = [];
 
   constructor(private socketService: SocketService, private router: Router) { }
-
+  onResize(event){ //if the screen is resized, recalculate the mobile ratio
+    this.mobileRatio = event.target.innerWidth < 568 ? 1.61290323 : 1;
+  }
   ngOnInit() {
     if (!this.name || !this.room) //if these values are not stored
       this.router.navigate(['/']); // go back to the home page
@@ -82,7 +91,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
       .subscribe((res: [MouseEvent, MouseEvent]) => {
         let mouseDownEvent: MouseEvent = res[0];
         let mouseMoveEvent: MouseEvent = res[1];
-        //We calculate the relative position of the mouse minus the borders of the canvas and save
+        //We save the mouse coordinates in a Instructions object
         let instructions: Instructions = { prevPos: { x: 0, y: 0 }, currentPos: { x: 0, y: 0 } };
         instructions.prevPos = {
           x: mouseDownEvent.clientX,
@@ -108,15 +117,15 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
         let previousTouch = res[0].touches[0];
         let currentTouch = res[1].touches[0];
         let instructions: Instructions = { prevPos: { x: 0, y: 0 }, currentPos: { x: 0, y: 0 } };
-        instructions.prevPos = {
-          x: previousTouch.clientX,
-          y: previousTouch.clientY
+        instructions.prevPos = { //Multiply the instructions by the mobile ratio
+          x: Math.round(previousTouch.clientX * this.mobileRatio),
+          y: Math.round(previousTouch.clientY * this.mobileRatio)
         }
         instructions.currentPos = {
-          x: currentTouch.clientX,
-          y: currentTouch.clientY
+          x: Math.round(currentTouch.clientX * this.mobileRatio),
+          y: Math.round(currentTouch.clientY * this.mobileRatio)
         };
-        this.socketService.sendDrawingInstructions(instructions, this.options); //send these instructions to all clienst
+        this.socketService.sendDrawingInstructions(instructions, this.options); //send these instructions to all clients
         this.drawOnCanvas(instructions, this.options);//draw them
       });
   }
@@ -127,9 +136,8 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
     this.cx.lineCap = options.lineCap;
     this.cx.strokeStyle = options.strokeStyle;
     this.cx.beginPath();
-    this.cx.scale(3/4,3/4);
     const rect = this.canvasEl.getBoundingClientRect(); //returns the size and position of the canvas rectangle
-    if (instructions.prevPos) {
+    if (instructions.prevPos) { //get instructions and subtract them from rectangular size
       this.cx.moveTo(instructions.prevPos.x - rect.left, instructions.prevPos.y - rect.top); // from previous position
       this.cx.lineTo(instructions.currentPos.x - rect.left, instructions.currentPos.y - rect.top); //to current position
       this.cx.stroke(); //draw!
