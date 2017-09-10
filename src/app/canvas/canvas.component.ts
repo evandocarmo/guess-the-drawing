@@ -17,7 +17,7 @@ import 'rxjs/add/operator/switchMap';
   selector: 'app-canvas',
   templateUrl: './canvas.component.html',
   styleUrls: ['./canvas.component.css'],
-  host:{ //host option allows us to access the window object, calling a component method when window is resized
+  host: { //host option allows us to access the window object, calling a component method when window is resized
     '(window:resize)': 'onResize($event)'
   }
 })
@@ -30,7 +30,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
   //To make sure drawing looks the same in all screens, we have to multiply the drawing coordinates
   // By the ratio of the original canvas (500px) and the reduced canvas on mobile, as set on the CSS file (310px)
   //If the mobile device's screen width is bigger than 568px, it fits the original canvas, and the ratio is set to 1
-  mobileRatio : number = window.screen.width < 568 ? 1.61290323 : 1;
+  mobileRatio: number = window.screen.width < 569 ? 1.61290323 : 1;
   canvasEl: HTMLCanvasElement;
   private cx: CanvasRenderingContext2D; //Object interface that holds the canvas configuration
   public options: Options = { //this Options object can be altered by the user
@@ -51,9 +51,11 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
   answers: string[] = [];
 
   constructor(private socketService: SocketService, private router: Router) { }
-  onResize(event){ //if the screen is resized, recalculate the mobile ratio
-    this.mobileRatio = event.target.innerWidth < 568 ? 1.61290323 : 1;
+
+  onResize(event) { //if the screen is resized, recalculate the mobile ratio
+    this.mobileRatio = event.target.innerWidth < 569 ? 1.61290323 : 1;
   }
+
   ngOnInit() {
     if (!this.name || !this.room) //if these values are not stored
       this.router.navigate(['/']); // go back to the home page
@@ -64,6 +66,8 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
         this.chatMessages.push(data.text);
       if (data.type === "new-answer")
         this.answers.push(data.text);
+      if (data.type === 'clear')
+        this.clearAll();
     });
   }
   ngOnDestroy() {
@@ -143,6 +147,9 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
       this.cx.stroke(); //draw!
     }
   }
+  clearAll() {
+    this.cx.clearRect(0, 0, 500, 300);
+  }
   sendMessage() {
     this.socketService.sendMessage(this.myMessage);
     this.myMessage = '';
@@ -150,5 +157,9 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
   sendAnswer() {
     this.socketService.sendAnswer(this.myAnswer);
     this.myAnswer = '';
+  }
+  sendClear() { //IMPLEMENT CLEAR FUNCTION
+    this.clearAll();
+    this.socketService.sendClear();
   }
 }

@@ -8,15 +8,16 @@
   <option value="square">Square</option>
 </select>
 <input type="color" id="strokeStyle" name="strokeStyle" [(ngModel)]="options.strokeStyle">
+<button id="clear" (click)="sendClear()">Clear</button>
 <!-- Chat Message -->
 <ul>
   <li *ngFor="let message of chatMessages">{{message}}</li>
 </ul>
 <input type="text" id="chatInput" name="chatInput" [(ngModel)]="myMessage">
-<button id="send" (click)="sendMessage()">Send</button>
+<button id="sendChat" (click)="sendMessage()">Send</button>
 <!-- Answer Box -->
 <ul>
   <li *ngFor="let answer of answers">{{answer}}</li>
 </ul>
 <input type="text" id="answerInput" name="answerInput" [(ngModel)]="myAnswer">
-<button id="send" (click)="sendAnswer()">Send</button>
+<button id="sendAnswer" (click)="sendAnswer()">Send</button>

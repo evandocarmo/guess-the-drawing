@@ -22,6 +22,10 @@ export class SocketService {
         observer.next(data); //observer pushes data through service
       });
 
+      this.socket.on('clear',(data)=>{
+        observer.next(data);
+      })
+
       this.socket.on('drawingInstructions', (data) => {
         //data contains one object called instructions and one object called options
         observer.next(data);
@@ -30,6 +34,7 @@ export class SocketService {
       this.socket.on('answer', (data) => { //socket receives answer message
         observer.next(data);
       });
+
       this.socket.on('disconnect', (reason) => {
         console.log(reason);
         this.router.navigate(['home']); //go back to home page if socket is disconnected
@@ -46,7 +51,10 @@ export class SocketService {
   sendDrawingInstructions(instructions: Instructions, options: Options) { //Method that emits drawing instructions to all clients
     this.socket.emit('add-drawingInstructions', instructions, options);
   }
-  sendAnswer(answer: string) {//emits answer message
+  sendAnswer(answer: string) { //emits answer message
     this.socket.emit('add-answer', answer);
+  }
+  sendClear(){
+    this.socket.emit('clear');
   }
 }

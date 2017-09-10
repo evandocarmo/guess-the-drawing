@@ -34,6 +34,11 @@ io.on('connection', (socket) => { //When a user connects...
       text: answer
     });
   });
+  socket.on('clear',()=>{
+    io.sockets.in(room).emit('clear',{
+      type:'clear'
+    });
+  });
   socket.on('add-message', (message) => {
     io.sockets.in(room).emit('message', {
       type: 'new-message',
