@@ -96,14 +96,15 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
         let mouseDownEvent: MouseEvent = res[0];
         let mouseMoveEvent: MouseEvent = res[1];
         //We save the mouse coordinates in a Instructions object
+        const rect = this.canvasEl.getBoundingClientRect(); //returns the size and position of the canvas rectangle
         let instructions: Instructions = { prevPos: { x: 0, y: 0 }, currentPos: { x: 0, y: 0 } };
         instructions.prevPos = {
-          x: mouseDownEvent.clientX,
-          y: mouseDownEvent.clientY
+          x: mouseDownEvent.clientX - rect.left,
+          y: mouseDownEvent.clientY - rect.top
         }
         instructions.currentPos = {
-          x: mouseMoveEvent.clientX,
-          y: mouseMoveEvent.clientY
+          x: mouseMoveEvent.clientX - rect.left,
+          y: mouseMoveEvent.clientY - rect.top
         };
         this.socketService.sendDrawingInstructions(instructions, this.options); //send these instructions to all clienst
         this.drawOnCanvas(instructions, this.options);//draw them
@@ -120,14 +121,15 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
       }).subscribe((res: [TouchEvent, TouchEvent]) => {
         let previousTouch = res[0].touches[0];
         let currentTouch = res[1].touches[0];
+        const rect = this.canvasEl.getBoundingClientRect(); //returns the size and position of the canvas rectangle
         let instructions: Instructions = { prevPos: { x: 0, y: 0 }, currentPos: { x: 0, y: 0 } };
         instructions.prevPos = { //Multiply the instructions by the mobile ratio
-          x: Math.round(previousTouch.clientX * this.mobileRatio),
-          y: Math.round(previousTouch.clientY * this.mobileRatio)
+          x: Math.round(previousTouch.clientX - rect.left) * this.mobileRatio,
+          y: Math.round(previousTouch.clientY - rect.top) * this.mobileRatio
         }
         instructions.currentPos = {
-          x: Math.round(currentTouch.clientX * this.mobileRatio),
-          y: Math.round(currentTouch.clientY * this.mobileRatio)
+          x: Math.round(currentTouch.clientX - rect.left) * this.mobileRatio,
+          y: Math.round(currentTouch.clientY - rect.top) * this.mobileRatio
         };
         this.socketService.sendDrawingInstructions(instructions, this.options); //send these instructions to all clients
         this.drawOnCanvas(instructions, this.options);//draw them
@@ -140,10 +142,9 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
     this.cx.lineCap = options.lineCap;
     this.cx.strokeStyle = options.strokeStyle;
     this.cx.beginPath();
-    const rect = this.canvasEl.getBoundingClientRect(); //returns the size and position of the canvas rectangle
     if (instructions.prevPos) { //get instructions and subtract them from rectangular size
-      this.cx.moveTo(instructions.prevPos.x - rect.left, instructions.prevPos.y - rect.top); // from previous position
-      this.cx.lineTo(instructions.currentPos.x - rect.left, instructions.currentPos.y - rect.top); //to current position
+      this.cx.moveTo(instructions.prevPos.x, instructions.prevPos.y); // from previous position
+      this.cx.lineTo(instructions.currentPos.x, instructions.currentPos.y); //to current position
       this.cx.stroke(); //draw!
     }
   }
