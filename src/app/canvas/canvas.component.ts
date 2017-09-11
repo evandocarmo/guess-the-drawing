@@ -59,6 +59,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
   ngOnInit() {
     if (!this.name || !this.room) //if these values are not stored
       this.router.navigate(['/']); // go back to the home page
+      //Subscribe to the socket Observable, receiving all the events emmitted by it
     this.subscription = this.socketService.connect(this.room).subscribe(data => {
       if (data.type === "new-drawingInstructions")
         this.drawOnCanvas(data.instructions, data.options); //Listen to changes on the canvas and draw them on this canvas
@@ -96,7 +97,8 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
         let mouseDownEvent: MouseEvent = res[0];
         let mouseMoveEvent: MouseEvent = res[1];
         //We save the mouse coordinates in a Instructions object
-        const rect = this.canvasEl.getBoundingClientRect(); //returns the size and position of the canvas rectangle
+        const rect = this.canvasEl.getBoundingClientRect(); //returns the size and position of the canvas
+        //Subtract the clicking coordinates from the canvas dimensions
         let instructions: Instructions = { prevPos: { x: 0, y: 0 }, currentPos: { x: 0, y: 0 } };
         instructions.prevPos = {
           x: mouseDownEvent.clientX - rect.left,
@@ -123,7 +125,8 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
         let currentTouch = res[1].touches[0];
         const rect = this.canvasEl.getBoundingClientRect(); //returns the size and position of the canvas rectangle
         let instructions: Instructions = { prevPos: { x: 0, y: 0 }, currentPos: { x: 0, y: 0 } };
-        instructions.prevPos = { //Multiply the instructions by the mobile ratio
+        instructions.prevPos = {
+        //Subtract the touch coordinates from the canvas rectangle dimensions, then multiply the instructions by the mobile ratio
           x: Math.round(previousTouch.clientX - rect.left) * this.mobileRatio,
           y: Math.round(previousTouch.clientY - rect.top) * this.mobileRatio
         }
@@ -142,7 +145,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
     this.cx.lineCap = options.lineCap;
     this.cx.strokeStyle = options.strokeStyle;
     this.cx.beginPath();
-    if (instructions.prevPos) { //get instructions and subtract them from rectangular size
+    if (instructions.prevPos) { //get instructions
       this.cx.moveTo(instructions.prevPos.x, instructions.prevPos.y); // from previous position
       this.cx.lineTo(instructions.currentPos.x, instructions.currentPos.y); //to current position
       this.cx.stroke(); //draw!
@@ -159,7 +162,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
     this.socketService.sendAnswer(this.myAnswer);
     this.myAnswer = '';
   }
-  sendClear() { //IMPLEMENT CLEAR FUNCTION
+  sendClear() { //Send signal to clear all screens
     this.clearAll();
     this.socketService.sendClear();
   }
