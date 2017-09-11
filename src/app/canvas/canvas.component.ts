@@ -101,12 +101,12 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
         //Subtract the clicking coordinates from the canvas dimensions
         let instructions: Instructions = { prevPos: { x: 0, y: 0 }, currentPos: { x: 0, y: 0 } };
         instructions.prevPos = {
-          x: mouseDownEvent.clientX - rect.left,
-          y: mouseDownEvent.clientY - rect.top
+          x: mouseDownEvent.pageX - rect.left,
+          y: mouseDownEvent.pageY - rect.top
         }
         instructions.currentPos = {
-          x: mouseMoveEvent.clientX - rect.left,
-          y: mouseMoveEvent.clientY - rect.top
+          x: mouseMoveEvent.pageX - rect.left,
+          y: mouseMoveEvent.pageY - rect.top
         };
         this.socketService.sendDrawingInstructions(instructions, this.options); //send these instructions to all clienst
         this.drawOnCanvas(instructions, this.options);//draw them
@@ -127,12 +127,12 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
         let instructions: Instructions = { prevPos: { x: 0, y: 0 }, currentPos: { x: 0, y: 0 } };
         instructions.prevPos = {
         //Subtract the touch coordinates from the canvas rectangle dimensions, then multiply the instructions by the mobile ratio
-          x: Math.round(previousTouch.clientX - rect.left) * this.mobileRatio,
-          y: Math.round(previousTouch.clientY - rect.top) * this.mobileRatio
+          x: Math.round(previousTouch.pageX - rect.left) * this.mobileRatio,
+          y: Math.round(previousTouch.pageY - rect.top) * this.mobileRatio
         }
         instructions.currentPos = {
-          x: Math.round(currentTouch.clientX - rect.left) * this.mobileRatio,
-          y: Math.round(currentTouch.clientY - rect.top) * this.mobileRatio
+          x: Math.round(currentTouch.pageX - rect.left) * this.mobileRatio,
+          y: Math.round(currentTouch.pageY - rect.top) * this.mobileRatio
         };
         this.socketService.sendDrawingInstructions(instructions, this.options); //send these instructions to all clients
         this.drawOnCanvas(instructions, this.options);//draw them
