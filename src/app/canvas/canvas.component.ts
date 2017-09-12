@@ -7,7 +7,7 @@ import { SocketService } from '../socket.service';
 import { Instructions } from '../instructions';
 import { Options } from '../options';
 import { Router } from '@angular/router';
-
+import { Message } from '../message'
 import 'rxjs/add/observable/fromEvent';
 import 'rxjs/add/operator/takeUntil';
 import 'rxjs/add/operator/pairwise';
@@ -43,12 +43,18 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
   @Input() public height = 250;
 
   //CHAT MESSAGE BOX VARIABLES
-  myMessage: string; //The current user's message
-  chatMessages: string[] = []; //array that holds chat messages sent and received
+  myMessage: Message = {
+    text: '',
+    name: this.name
+  }; //The current user's message
+  chatMessages: Message[] = []; //array that holds chat messages sent and received
 
   //ANSWERS BOX VARIABLES
-  myAnswer: string;
-  answers: string[] = [];
+  myAnswer: Message = {
+    text: '',
+    name: this.name
+  };
+  answers: Message[] = [];
 
   constructor(private socketService: SocketService, private router: Router) { }
 
@@ -59,8 +65,8 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
   ngOnInit() {
     if (!this.name || !this.room) //if these values are not stored
       this.router.navigate(['/']); // go back to the home page
-      //Subscribe to the socket Observable, receiving all the events emmitted by it
-    this.subscription = this.socketService.connect(this.room).subscribe(data => {
+    //Subscribe to the socket Observable, receiving all the events emmitted by it
+    this.subscription = this.socketService.connect(this.room, this.name).subscribe(data => {
       if (data.type === "new-drawingInstructions")
         this.drawOnCanvas(data.instructions, data.options); //Listen to changes on the canvas and draw them on this canvas
       if (data.type === "new-message")
@@ -126,7 +132,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
         const rect = this.canvasEl.getBoundingClientRect(); //returns the size and position of the canvas rectangle
         let instructions: Instructions = { prevPos: { x: 0, y: 0 }, currentPos: { x: 0, y: 0 } };
         instructions.prevPos = {
-        //Subtract the touch coordinates from the canvas rectangle dimensions, then multiply the instructions by the mobile ratio
+          //Subtract the touch coordinates from the canvas rectangle dimensions, then multiply the instructions by the mobile ratio
           x: Math.round(previousTouch.pageX - rect.left) * this.mobileRatio,
           y: Math.round(previousTouch.pageY - rect.top) * this.mobileRatio
         }
@@ -156,11 +162,11 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnDestroy {
   }
   sendMessage() {
     this.socketService.sendMessage(this.myMessage);
-    this.myMessage = '';
+    this.myMessage.text = '';
   }
   sendAnswer() {
     this.socketService.sendAnswer(this.myAnswer);
-    this.myAnswer = '';
+    this.myAnswer.text = '';
   }
   sendClear() { //Send signal to clear all screens
     this.clearAll();

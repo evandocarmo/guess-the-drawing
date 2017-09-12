@@ -4,6 +4,7 @@ import { Instructions } from './instructions';
 import { Options } from './options';
 import { Router } from '@angular/router';
 import { Injectable } from '@angular/core';
+import { Message } from './message';
 
 @Injectable() //Injectable declaration allows service to be injected with a provider, in this case, the router
 export class SocketService {
@@ -11,10 +12,12 @@ export class SocketService {
 
   constructor(private router: Router) { }
 
-  connect(room: string = "1"): Observable<any> { //Method that creates the socket. Takes a room as parameter
+  connect(room: string = "1", name: string): Observable<any> { //Method that creates the socket. Takes a room as parameter
+    if(!name)
+      return;
     console.log('connecting');
     this.socket = io();
-    this.socket.emit('join room', room); // joins the room specified
+    this.socket.emit('join room', room, name); // joins the room specified
 
     let observable = new Observable(observer => {
 
@@ -45,13 +48,13 @@ export class SocketService {
     })
     return observable;
   }
-  sendMessage(message: string) { //Method that emits to all clients a message
+  sendMessage(message: Message) { //Method that emits to all clients a message
     this.socket.emit('add-message', message);
   }
   sendDrawingInstructions(instructions: Instructions, options: Options) { //Method that emits drawing instructions to all clients
     this.socket.emit('add-drawingInstructions', instructions, options);
   }
-  sendAnswer(answer: string) { //emits answer message
+  sendAnswer(answer: Message) { //emits answer message
     this.socket.emit('add-answer', answer);
   }
   sendClear(){

@@ -11,13 +11,13 @@
 <button id="clear" (click)="sendClear()">Clear</button>
 <!-- Chat Message -->
 <ul>
-  <li *ngFor="let message of chatMessages">{{message}}</li>
+  <li *ngFor="let message of chatMessages">{{message.text}} - {{message.name}}</li>
 </ul>
-<input type="text" id="chatInput" name="chatInput" [(ngModel)]="myMessage">
+<input type="text" placeholder="Write a message" id="chatInput" name="chatInput" [(ngModel)]="myMessage.text">
 <button id="sendChat" (click)="sendMessage()">Send</button>
 <!-- Answer Box -->
 <ul>
-  <li *ngFor="let answer of answers">{{answer}}</li>
+  <li *ngFor="let answer of answers">{{answer.text}} - {{answer.name}}</li>
 </ul>
-<input type="text" id="answerInput" name="answerInput" [(ngModel)]="myAnswer">
+<input type="text" placeholder="Guess the answer" id="answerInput" name="answerInput" [(ngModel)]="myAnswer.text">
 <button id="sendAnswer" (click)="sendAnswer()">Send</button>

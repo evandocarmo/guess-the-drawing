@@ -1,3 +1,3 @@
-<input type="text" id="name" [(ngModel)]="name">
-<input type="text" id="room" [(ngModel)]="room">
+<input type="text" id="name" placeholder="What's your name?" [(ngModel)]="name">
+<input type="text" id="room" placeholder="Type a room name" [(ngModel)]="room">
 <button (click)="enterRoom()" [disabled]="!name || !room">Enter Room</button>
