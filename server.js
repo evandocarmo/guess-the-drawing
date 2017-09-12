@@ -7,12 +7,11 @@ app.use(express.static(__dirname + '/dist'));
 
 app.use((req, res) => res.sendfile(__dirname + '/dist/index.html'));
 
-let room;
-let user = {
-  name: null
-};
-
 io.on('connection', (socket) => { //When a user connects...
+  let room;
+  let user = {
+    name: null
+  };
   console.log('user connected', new Date().toLocaleString());
 
   socket.on('join room', (roomName, username) => { //and emits a 'join room' event, make it join that room
